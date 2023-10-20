@@ -1,0 +1,49 @@
+name: Pull Image from ACR & Deploy to AKS
+
+on:
+ workflow_dispatch:
+  
+jobs:
+  build-and-push:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v3
+
+    - name: Login to Azure
+      uses: azure /login@v1.4.6
+      with:
+       client-id: ${{ secrets.AZURE_CLIENT_ID }}
+       tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+       subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+       
+    - name: setup kubelogin
+      uses: azure/use-kubelogin@v1
+      with:
+        kubelogin-version: 'v0.0.25'
+
+    - name: set AKS content
+      id: set-context
+      uses: azure/aks-set-context@v3
+      with: 
+        resource-group: adm-deejayac1
+        cluster-name: webappaks
+        admin: 'false'
+        use-kubelogin: 'true'
+
+    - name: Deploy to AKS
+      run: |
+          kubectl apply -f /home/adm-deepika/azuredemoproject/Deployment.yaml
+
+   
+   
+  
+   
+
+
+     
